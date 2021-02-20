@@ -17,13 +17,17 @@ def load_wine():
     return df
 
 def load_mushroom():
-    df = pd.read_csv('data/mushroom/agaricus-lepiota.data')
-#    df.drop(columns=['id'], inplace=True)
-#    df['malignant'] = df['malignant'] == 4
+    names = ['classification'] + [f'f{i}' for i in range(1,23)]
+    df = pd.read_csv('data/mushroom/agaricus-lepiota.data', names=names)
+    df.drop(columns=['f11'], inplace=True)
+#    df.drop(columns=[f'f{i}' for i in range(6,23)], inplace=True)
     df = df.astype("category")
+    for col in df:
+        df[col] = df[col].cat.codes
+    df['classification'] = df.pop('classification')
     return df
 
 if __name__=='__main__':
-    print(load_cancer())
-    print(load_wine())
-#    print(load_mushroom())
+#    print(load_cancer())
+#    print(load_wine())
+    print(load_mushroom())
