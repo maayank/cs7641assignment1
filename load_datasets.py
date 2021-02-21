@@ -9,11 +9,14 @@ def load_cancer():
 
 def load_wine():
     df1 = pd.read_csv('data/wine/winequality-red.csv', sep=';')
-    df1.insert(0, 'type', 1)
+#    df1.insert(0, 'type', 1)
     df2 = pd.read_csv('data/wine/winequality-white.csv', sep=';')
-    df2.insert(0, 'type', 2)
+#    df2.insert(0, 'type', 2)
+    df1['red'] = 1
+    df2['red'] = 0
     df = df1.append(df2, ignore_index=True)
-    df['quality'] = df['quality'] > 5
+#    df = df1
+#    df['quality'] = df['quality'] > 5
     return df
 
 def load_mushroom():
@@ -29,5 +32,5 @@ def load_mushroom():
 
 if __name__=='__main__':
 #    print(load_cancer())
-#    print(load_wine())
-    print(load_mushroom())
+    print(load_wine())
+#    print(load_mushroom())
