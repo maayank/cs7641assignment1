@@ -43,7 +43,6 @@ if __name__=='__main__':
                     'interesting_parameters': {
                         'n_neighbors': np.arange(3, 8),
                         'weights': ['uniform', 'distance'],
-                        'p': [1,2]
                     }
                 },
                 {
@@ -64,15 +63,14 @@ if __name__=='__main__':
     data = {
            "Cancer": load_cancer(),
            "Wine": load_wine(),
-#           "Mushroom": load_mushroom()
             }
 
     results = []
     for d_name in data:
         df = data[d_name]
         for ex_params in experiments:
-            for scale in [0,1]:
-                for grid_search in [0,1]:
+            for scale in [0, 1]:
+                for grid_search in [0, 1]:
                     ex = Experiment(scale, grid_search, **ex_params)
                     ex.load(d_name, df)
                     accuracy, f1, precision, recall = ex.do()

@@ -47,7 +47,7 @@ class Experiment:
         return tuple(func(test_y, pred_y) for func in [accuracy_score, f1_score, precision_score, recall_score])
 
     def _save_fig(self, name):
-        plt.savefig(f'{self.data_name}_{self.estimator_name}_{int(self.scale)}{int(self.grid_search)}_{name}.png', dpi=200)
+        plt.savefig(f'{self.data_name}_{self.estimator_name}_{int(self.scale)}{int(self.grid_search)}_{name}.png', dpi=200, bbox_inches='tight')
 
     def _make_learning_curve(self):
         np.random.seed(42)
@@ -109,8 +109,14 @@ class Experiment:
     def _make_validation_curve(self):
         np.random.seed(42)
         from sklearn.model_selection import validation_curve
-        for param_name in self.interesting_parameters:
-            plt.clf()
+        plt.clf()
+        n = len(self.interesting_parameters)
+#        n = int(n ** .5)
+#        if (n ** 2) < len(self.interesting_parameters):
+#            n += 1
+        fig, axes = plt.subplots(1, n, figsize=(20,3))
+#        fig.suptitle(f"Validation Curves with {self.estimator_name}")
+        for i, param_name in enumerate(self.interesting_parameters):
             param_range = self.interesting_parameters[param_name]
             train_scores, test_scores = validation_curve(self.estimator, self.training_X, self.training_y,
             param_name=param_name, param_range=param_range, n_jobs=-1, scoring=SCORING)
@@ -130,33 +136,31 @@ class Experiment:
             else:
                 param_labels = None
 
-            plt.title(f"Validation Curve with {self.estimator_name}")
-            plt.xticks(param_range, labels=param_labels)
-            plt.xlabel(param_name)
-            plt.ylabel("Score")
-            plt.ylim(0.0, 1.1)
+            if n > 1:
+                ax = axes[i]
+            else:
+                ax = axes
+            ax.grid()
+            ax.set_xticks(param_range)
+            if param_labels is not None:
+                ax.set_xticklabels(labels=param_labels)
+            ax.set_xlabel(param_name)
+            ax.set_ylabel("Score")
+            ax.set_ylim(0.0, 1.1)
             lw = 2
 
-#            def map_p(p):
-#                if p is None:
-#                    return 0
-#                if p == 'auto':
-#                    return 666
-#                return p
-#            param_range = list(map(map_p, param_range))
-
-            plt.plot(param_range, train_scores_mean, label="Training score",
+            ax.plot(param_range, train_scores_mean, label="Training score",
                          color="darkorange", lw=lw)
-            plt.fill_between(param_range, train_scores_mean - train_scores_std,
+            ax.fill_between(param_range, train_scores_mean - train_scores_std,
                              train_scores_mean + train_scores_std, alpha=0.2,
                              color="darkorange", lw=lw)
-            plt.plot(param_range, test_scores_mean, label="Cross-validation score",
+            ax.plot(param_range, test_scores_mean, label="Cross-validation score",
                          color="navy", lw=lw)
-            plt.fill_between(param_range, test_scores_mean - test_scores_std,
+            ax.fill_between(param_range, test_scores_mean - test_scores_std,
                              test_scores_mean + test_scores_std, alpha=0.2,
                              color="navy", lw=lw)
-            plt.legend(loc="best")
-            self._save_fig(f'validation_curve_{param_name}')
+            ax.legend(loc="best")
+        self._save_fig('validation_curves')
 
     def _grid_search(self):
         np.random.seed(42)
